@@ -41,13 +41,31 @@ entity ALU is
 end ALU;
 
 architecture Behavioral of ALU is
+signal equalsZero: std_logic;
+signal lessThanZero: std_logic;
+signal result: STD_LOGIC_VECTOR (31 downto 0);
 begin             
-    with ALUControl select ALUResult <=
-        SrcA + SrcB when "000",
-        SrcA - SrcB when "001",
-        SrcA and SrcB when "010",
-        SrcA or SrcB when "011",
-        SrcA nor SrcB when "100",
-        std_logic_vector(shift_left(signed(SrcA), to_integer(signed(SrcB)))) when "101",
-        (others => '0') when others;
+
+    with ALUControl select result <=
+        SrcA + SrcB when x"0",
+        SrcA - SrcB when x"1",
+        SrcA and SrcB when x"2",
+        SrcA or SrcB when x"3",
+        SrcA nor SrcB when x"4",
+        std_logic_vector(shift_left(signed(SrcA), to_integer(signed(SrcB)))) when x"5",
+        SrcA - SrcB when x"6",
+        SrcA - SrcB when x"7",
+        SrcA - SrcB when others;--x"8";
+        
+        
+    with result select equalsZero <=
+        '1' when x"00000000",
+        '0' when others;
+   
+   with ALUControl select Zero <=
+        result(31) when x"6",
+        equalsZero when x"7",
+        not equalsZero when others;--x"8";
+   
+   ALUResult <= result;
 end Behavioral;
